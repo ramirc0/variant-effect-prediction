@@ -19,6 +19,17 @@ from variant_effect_prediction.wrappers.base import ManyTracksWrapperBase
 ENFORMER_SEQ_LEN = 196_608
 
 
+def _require_tf_gamma(enformer: nn.Module) -> None:
+    from enformer_pytorch.modeling_enformer import Attention
+
+    flags = [m.use_tf_gamma for m in enformer.modules() if isinstance(m, Attention)]
+    if not all(flags):
+        raise ValueError(
+            "Enformer must be loaded with use_tf_gamma=True, e.g. "
+            "Enformer.from_pretrained(path, use_tf_gamma=True)"
+        )
+
+
 class EnformerSummedTrack(ManyTracksWrapperBase):
     bin_size = 128
     n_output_bins = 896
@@ -33,6 +44,7 @@ class EnformerSummedTrack(ManyTracksWrapperBase):
     ) -> None:
         super().__init__(enformer, track_idx, eval_window_len, epsilon=epsilon)
         self.head = head
+        _require_tf_gamma(enformer)
 
     def _predict_central_tracks(self, X: torch.Tensor) -> torch.Tensor:
         if X.shape[-1] != ENFORMER_SEQ_LEN:
