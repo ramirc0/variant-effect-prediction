@@ -58,6 +58,10 @@ class _ManyTracksVariantScorer(VariantScorer):
         self.wrapper.eval()
         self.wrapper.to(device)
 
+        # The wrapper is the authority on input length (AlphaGenome takes it as a ctor
+        # arg), so adopt it before sizing chunks: fetch + chunking must agree.
+        self.context_len = getattr(self.wrapper, "context_len", self.context_len)
+
         # How many variants to one-hot on the host at a time (bounds host RAM).
         # Derived from the context length unless the caller overrides it.
         if host_chunk_size is not None:

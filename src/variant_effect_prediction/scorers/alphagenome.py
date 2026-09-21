@@ -44,5 +44,3 @@ class AlphaGenomeVariantScorer(_ManyTracksVariantScorer):
             dtype=dtype,
             wrapper_kwargs=wrapper_kwargs,
         )
-        # Update context_len on the instance if the wrapper was built with a custom one.
-        self.context_len = self.wrapper.context_len
